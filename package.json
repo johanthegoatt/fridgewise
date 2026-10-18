@@ -1,0 +1,10 @@
+{
+  "name": "fridgewise",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Know what to eat before it goes off. A quick fridge, freezer and cupboard list that sorts itself by what to use first. With Frost the fridge.",
+  "scripts": {
+    "test": "node --test"
+  },
+  "license": "MIT"
+}
