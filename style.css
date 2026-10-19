@@ -194,3 +194,7 @@ button {
   .frost svg { width: 66px; height: 82px; }
   .frost-bubble { max-width: 200px; }
 }
+
+/* Pack-date advice line (use-by vs best-before) */
+.i-advice { font-size: 13px; font-weight: 600; color: var(--now); margin-top: 3px; }
+.i-advice.mild { color: var(--soon); font-weight: 500; }

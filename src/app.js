@@ -14,6 +14,8 @@
   var elCustomWrap = document.getElementById("custom-wrap");
   var elCustom = document.getElementById("custom");
   var elKeeps = document.getElementById("keeps");
+  var elPackDate = document.getElementById("pack-date");
+  var elPackKind = document.getElementById("pack-kind");
   var form = document.getElementById("form");
   var list = document.getElementById("list");
   var empty = document.getElementById("empty");
@@ -108,6 +110,11 @@
     } else {
       item.name = FW.food(id).name;
     }
+    // A date printed on the pack wins over the stored-time guess.
+    if (elPackDate && elPackDate.value) {
+      item.packDate = new Date(elPackDate.value + "T00:00:00").getTime();
+      item.dateKind = elPackKind.value === "best" ? "best" : "use";
+    }
     items.push(item);
     save();
     render();
@@ -115,6 +122,7 @@
     if (window.Frost) Frost.react(soon ? "added-soon" : "added");
     // Reset for a quick next add, keeping the date.
     elCustom.value = "";
+    if (elPackDate) elPackDate.value = "";
     elFood.value = id === "custom" ? "custom" : elFood.value;
     elFood.focus();
   });
@@ -172,8 +180,16 @@
       name.textContent = it.name || (FW.food(it.food) ? FW.food(it.food).name : "Food");
       var sub = document.createElement("div");
       sub.className = "i-sub";
-      sub.textContent = FW.places[it.place] + (it.opened ? " · open" : "");
+      sub.textContent = FW.places[it.place] + (it.opened ? " · open" : "") + (it.packDate ? " · " + (it.dateKind === "best" ? "best-before" : "use-by") + " on pack" : "");
       main.appendChild(name); main.appendChild(sub);
+
+      var tip = FW.advice(it);
+      if (tip) {
+        var note = document.createElement("div");
+        note.className = "i-advice" + (it.dateKind === "best" ? " mild" : "");
+        note.textContent = tip;
+        main.appendChild(note);
+      }
 
       var left = document.createElement("div");
       left.className = "i-left";

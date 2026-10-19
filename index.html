@@ -50,6 +50,19 @@
         <input id="opened" type="checkbox">
         <span>Pack is open, or it's cooked</span>
       </label>
+      <div class="row" id="pack-wrap">
+        <label class="field grow">
+          <span>Date on the pack <small>(optional)</small></span>
+          <input id="pack-date" type="date">
+        </label>
+        <label class="field grow">
+          <span>That date is a</span>
+          <select id="pack-kind">
+            <option value="use">Use-by (safety)</option>
+            <option value="best">Best-before (quality)</option>
+          </select>
+        </label>
+      </div>
       <div class="actions">
         <button type="submit" class="primary">Add to the list</button>
         <button type="button" id="example" class="ghost">Try an example</button>
