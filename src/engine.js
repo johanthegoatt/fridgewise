@@ -92,12 +92,41 @@
 
   // The day food should be used by: the day it went in, plus its keep days.
   // A "Something else" item carries its own `days`, which wins over the table.
-  // addedAt and useBy are both midnight stamps.
+  // A date printed on the pack (packDate) wins over everything: a real use-by
+  // or best-before on the label beats any stored-time guess. addedAt, packDate
+  // and useBy are all midnight stamps.
   function useBy(item) {
+    if (item.packDate != null) {
+      var pd = startOfDay(item.packDate);
+      if (isFinite(pd)) return pd;
+    }
     var days = num(item.days);
     if (days == null) days = keepDays(item.food, item.place, item.opened);
     if (days == null) return null;
     return startOfDay(item.addedAt) + days * DAY;
+  }
+
+  // Short safety line for an item with a date printed on the pack. A use-by is
+  // about safety: don't eat it after. A best-before is about quality: it's
+  // usually fine after, just not at its best (UK FSA guidance). Returns "" when
+  // there's no pack date or the item isn't near/past it.
+  function advice(item, now) {
+    if (item.packDate == null) return "";
+    var d = daysLeft(item, now);
+    if (d == null) return "";
+    var best = item.dateKind === "best";
+    if (d < 0) {
+      return best
+        ? "Past the best-before. Have a look and a smell; it's usually still fine."
+        : "Past the use-by. Don't eat it.";
+    }
+    if (d <= 1) {
+      var when = d === 0 ? "today" : "tomorrow";
+      return best
+        ? "Best before " + when + ". Fine after, just not at its best."
+        : "Use by " + when + ". Eat it by then or freeze it.";
+    }
+    return "";
   }
 
   // Whole days from now (midnight today) until the use-by day. 0 means today,
@@ -161,6 +190,7 @@
     keepDays: keepDays,
     placesFor: placesFor,
     useBy: useBy,
+    advice: advice,
     daysLeft: daysLeft,
     bucket: bucket,
     rank: rank,

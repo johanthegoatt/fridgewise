@@ -102,3 +102,34 @@ test("freezer buys a lot more time than the fridge", function () {
   assert.strictEqual(FW.daysLeft(fridge, NOW), 1);
   assert.strictEqual(FW.daysLeft(freezer, NOW), 270);
 });
+
+// ---- a date printed on the pack wins, and the advice reflects use-by vs best-before ----
+
+function at(iso) { return new Date(iso + "T00:00:00").getTime(); }
+
+test("a pack date overrides the stored-time guess", function () {
+  // Milk would compute ~5-7 days, but the pack says the 20th.
+  var item = { food: "milk", place: "fridge", opened: false, addedAt: at("2026-06-14"), packDate: at("2026-06-20") };
+  assert.strictEqual(FW.useBy(item), FW.startOfDay(at("2026-06-20")));
+  assert.strictEqual(FW.daysLeft(item, NOW), 5);
+});
+
+test("a use-by in the past says don't eat it", function () {
+  var item = { food: "milk", place: "fridge", addedAt: at("2026-06-01"), packDate: at("2026-06-13"), dateKind: "use" };
+  assert.match(FW.advice(item, NOW), /Don't eat it/);
+});
+
+test("a best-before in the past says it's usually fine", function () {
+  var item = { food: "hard-cheese", place: "fridge", addedAt: at("2026-06-01"), packDate: at("2026-06-13"), dateKind: "best" };
+  assert.match(FW.advice(item, NOW), /usually still fine/);
+});
+
+test("advice is empty when the pack date is still days away", function () {
+  var item = { food: "milk", place: "fridge", addedAt: at("2026-06-14"), packDate: at("2026-06-25"), dateKind: "use" };
+  assert.strictEqual(FW.advice(item, NOW), "");
+});
+
+test("no pack date means no advice line", function () {
+  var item = { food: "milk", place: "fridge", addedAt: at("2026-06-14") };
+  assert.strictEqual(FW.advice(item, NOW), "");
+});
