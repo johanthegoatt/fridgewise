@@ -38,6 +38,13 @@ and the USDA FoodKeeper, using the shorter end of each range so the date leans
 safe. They are a guide, not a promise: a pack's own use-by date wins, and if
 something looks or smells off, bin it.
 
+If a pack has a date printed on it, type it in and say whether it's a **use-by**
+or a **best-before**. The pack date then overrides the stored-time guess, and
+Fridgewise gives the right advice for each: a use-by is about safety, so once
+it's passed the line is "don't eat it"; a best-before is about quality, so it's
+usually fine after, just not at its best. That split follows the UK Food
+Standards Agency's guidance on the two kinds of date.
+
 ## Run it
 
 It's plain HTML, CSS and JavaScript with no build step. Open `index.html`, or
