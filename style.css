@@ -198,3 +198,5 @@ button {
 /* Pack-date advice line (use-by vs best-before) */
 .i-advice { font-size: 13px; font-weight: 600; color: var(--now); margin-top: 3px; }
 .i-advice.mild { color: var(--soon); font-weight: 500; }
+
+.i-freeze { margin-top: 4px; font-size: .86rem; color: var(--accent, #2f7d4f); }

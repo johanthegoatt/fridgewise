@@ -191,6 +191,15 @@
         main.appendChild(note);
       }
 
+      // Use it or freeze it: a nudge for freezable things close to their date.
+      var freeze = FW.freezeHint(it);
+      if (freeze) {
+        var fnote = document.createElement("div");
+        fnote.className = "i-freeze";
+        fnote.textContent = freeze;
+        main.appendChild(fnote);
+      }
+
       var left = document.createElement("div");
       left.className = "i-left";
       left.textContent = FW.phrase(it);
