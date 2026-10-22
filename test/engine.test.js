@@ -133,3 +133,41 @@ test("no pack date means no advice line", function () {
   var item = { food: "milk", place: "fridge", addedAt: at("2026-06-14") };
   assert.strictEqual(FW.advice(item, NOW), "");
 });
+
+// Use it or freeze it.
+test("freezable foods are known, non-freezable ones aren't", function () {
+  assert.strictEqual(FW.canFreeze("bread"), true);     // bread has a freezer entry
+  assert.strictEqual(FW.canFreeze("milk"), true);
+  assert.strictEqual(FW.canFreeze("greens"), false);   // salad doesn't freeze
+  assert.strictEqual(FW.canFreeze("eggs"), false);
+});
+
+test("freeze-by is the item's use-by for a freezable fridge item", function () {
+  // Milk opened, 5-day fridge life. You can freeze it right up to the use-by.
+  var milk = { food: "milk", place: "fridge", opened: true, addedAt: NOW };
+  assert.strictEqual(FW.freezeBy(milk), FW.useBy(milk));
+  // Something already in the freezer has nothing to freeze.
+  var frozen = { food: "bread", place: "freezer", opened: false, addedAt: NOW };
+  assert.strictEqual(FW.freezeBy(frozen), null);
+  // Salad can't be frozen, so no freeze-by.
+  var salad = { food: "greens", place: "fridge", opened: true, addedAt: NOW };
+  assert.strictEqual(FW.freezeBy(salad), null);
+});
+
+test("the freeze nudge shows only when a freezable item is close to its date", function () {
+  var sausages = { food: "sausages", place: "fridge", opened: false, addedAt: daysAgo(1) }; // 2-day life, 1 left
+  var hint = FW.freezeHint(sausages, NOW);
+  assert.ok(/Freeze it by tomorrow/.test(hint));
+  assert.ok(/frozen/.test(hint));
+  // Fresh milk (5 days left) is not nagged about yet.
+  var milk = { food: "milk", place: "fridge", opened: true, addedAt: NOW };
+  assert.strictEqual(FW.freezeHint(milk, NOW), "");
+  // Salad close to its date still gets no freeze nudge (it can't be frozen).
+  var salad = { food: "greens", place: "fridge", opened: true, addedAt: daysAgo(2) };
+  assert.strictEqual(FW.freezeHint(salad, NOW), "");
+});
+
+test("a past-date item is too late to freeze", function () {
+  var sausages = { food: "sausages", place: "fridge", opened: false, addedAt: daysAgo(4) };
+  assert.strictEqual(FW.freezeHint(sausages, NOW), "");
+});
