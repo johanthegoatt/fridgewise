@@ -129,6 +129,46 @@
     return "";
   }
 
+  // Can this food go in the freezer at all? (Some, like salad or a cut tomato,
+  // can't be saved that way.)
+  function canFreeze(foodId) {
+    var f = byId[foodId];
+    return !!(f && f.freezer);
+  }
+
+  // Roughly how long it keeps once frozen, from the freezer entry.
+  function freezerDays(foodId) {
+    var f = byId[foodId];
+    if (!f || !f.freezer) return null;
+    return num(f.freezer.sealed != null ? f.freezer.sealed : f.freezer.open);
+  }
+
+  // The last day you can still freeze a fridge or cupboard item to stop the
+  // clock. Freezing before the date on the label keeps it safe (UK FSA / USDA),
+  // so the freeze-by day is just its use-by. Null if it can't be frozen, is
+  // already in the freezer, or has no date.
+  function freezeBy(item) {
+    if (!item || item.place === "freezer") return null;
+    if (!canFreeze(item.food)) return null;
+    return useBy(item);
+  }
+
+  // A short "use it or freeze it" nudge, shown only when a freezable item is
+  // within a couple of days of its date (and not already past). Includes how
+  // long it would then keep in the freezer.
+  function freezeHint(item, now) {
+    if (freezeBy(item) == null) return "";
+    var d = daysLeft(item, now);
+    if (d == null || d < 0 || d > 2) return "";
+    var when = d === 0 ? "today" : d === 1 ? "tomorrow" : "in " + d + " days";
+    var fd = freezerDays(item.food), keeps = "";
+    if (fd != null) {
+      var months = Math.round(fd / 30);
+      keeps = " It keeps about " + (fd >= 30 ? months + " month" + (months === 1 ? "" : "s") : fd + " days") + " frozen.";
+    }
+    return "Freeze it by " + when + " to save it." + keeps;
+  }
+
   // Whole days from now (midnight today) until the use-by day. 0 means today,
   // negative means it's past.
   function daysLeft(item, now) {
@@ -189,6 +229,10 @@
     startOfDay: startOfDay,
     keepDays: keepDays,
     placesFor: placesFor,
+    canFreeze: canFreeze,
+    freezerDays: freezerDays,
+    freezeBy: freezeBy,
+    freezeHint: freezeHint,
     useBy: useBy,
     advice: advice,
     daysLeft: daysLeft,
