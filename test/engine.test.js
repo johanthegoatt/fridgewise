@@ -171,3 +171,33 @@ test("a past-date item is too late to freeze", function () {
   var sausages = { food: "sausages", place: "fridge", opened: false, addedAt: daysAgo(4) };
   assert.strictEqual(FW.freezeHint(sausages, NOW), "");
 });
+
+test("opening a sealed item later pulls the use-by in to its open shelf life", function () {
+  var DAY = FW.DAY;
+  var added = FW.startOfDay(Date.now());
+  // Milk sealed keeps 7 days; opened keeps 5. Opened today, it's due in 5 days,
+  // sooner than the 7-day sealed date.
+  var openedToday = FW.startOfDay(Date.now());
+  var item = { food: "milk", place: "fridge", addedAt: added, opened: false, openedAt: openedToday };
+  var sealedBy = FW.useBy({ food: "milk", place: "fridge", addedAt: added, opened: false });
+  var openedBy = FW.useBy(item);
+  assert.ok(openedBy < sealedBy, "opening pulls the date earlier");
+  assert.strictEqual(openedBy, openedToday + 5 * DAY);
+  assert.strictEqual(FW.opensShorten(item), true);
+});
+
+test("opening doesn't push a date out past the pack date", function () {
+  var DAY = FW.DAY;
+  // Pack use-by is in 2 days; opening today (5-day open life) must not extend it.
+  var packDate = FW.startOfDay(Date.now() + 2 * DAY);
+  var item = { food: "milk", place: "fridge", addedAt: FW.startOfDay(Date.now()), packDate: packDate, openedAt: FW.startOfDay(Date.now()) };
+  assert.strictEqual(FW.useBy(item), packDate);
+  assert.strictEqual(FW.opensShorten(item), false);
+});
+
+test("an item never opened is unchanged", function () {
+  var added = FW.startOfDay(Date.now());
+  var item = { food: "hard-cheese", place: "fridge", addedAt: added, opened: false };
+  assert.strictEqual(FW.useBy(item), added + 42 * FW.DAY); // sealed hard cheese
+  assert.strictEqual(FW.opensShorten(item), false);
+});
