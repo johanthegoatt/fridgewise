@@ -96,6 +96,22 @@
   // or best-before on the label beats any stored-time guess. addedAt, packDate
   // and useBy are all midnight stamps.
   function useBy(item) {
+    var by = baseUseBy(item);
+    // Opening it later can pull the date in: once a sealed thing is opened it
+    // keeps only its open shelf life, even when the pack date is further off
+    // (FSA / USDA "once opened, use within N days"). The clock runs from the
+    // day you opened it, and the sooner of the two dates wins.
+    if (item.openedAt != null) {
+      var okd = keepDays(item.food, item.place, true);
+      if (okd != null) {
+        var oc = startOfDay(item.openedAt) + okd * DAY;
+        by = by == null ? oc : Math.min(by, oc);
+      }
+    }
+    return by;
+  }
+
+  function baseUseBy(item) {
     if (item.packDate != null) {
       var pd = startOfDay(item.packDate);
       if (isFinite(pd)) return pd;
@@ -104,6 +120,17 @@
     if (days == null) days = keepDays(item.food, item.place, item.opened);
     if (days == null) return null;
     return startOfDay(item.addedAt) + days * DAY;
+  }
+
+  // True when opening the item later is what pulls its use-by date in, so the
+  // page can say "opened, use within N days" rather than trust the pack date.
+  function opensShorten(item) {
+    if (!item || item.openedAt == null) return false;
+    var okd = keepDays(item.food, item.place, true);
+    if (okd == null) return false;
+    var base = baseUseBy(item);
+    var oc = startOfDay(item.openedAt) + okd * DAY;
+    return base == null || oc < base;
   }
 
   // Short safety line for an item with a date printed on the pack. A use-by is
@@ -234,6 +261,7 @@
     freezeBy: freezeBy,
     freezeHint: freezeHint,
     useBy: useBy,
+    opensShorten: opensShorten,
     advice: advice,
     daysLeft: daysLeft,
     bucket: bucket,
