@@ -22,6 +22,10 @@ too late. Fridgewise is a one-screen list that keeps the order for you.
   how long it keeps.
 - Your list shows up sorted, with the soonest at the top and a colour for how
   close each one is.
+- Tap **Opened it** the day you open a sealed thing, and the clock jumps to its
+  open shelf life counted from that day, which is often sooner than the pack
+  date. Milk, for instance, keeps about a week sealed but only a few days once
+  open.
 - Tap **Ate it** when it's gone, or put something in the freezer to buy weeks
   more time.
 
