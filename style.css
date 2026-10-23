@@ -127,6 +127,11 @@ button {
   border-radius: 9px; white-space: nowrap;
 }
 .i-eat:hover { background: var(--teal-ink); }
+.i-open {
+  background: transparent; color: var(--teal); border: 1.5px solid var(--teal); padding: 7px 11px; font-size: 14px;
+  border-radius: 9px; white-space: nowrap;
+}
+.i-open:hover { background: var(--teal); color: #fff; }
 .i-del {
   background: transparent; border: 0; color: var(--soft); font-size: 20px; line-height: 1;
   padding: 4px 8px; border-radius: 8px;

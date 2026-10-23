@@ -204,6 +204,7 @@
       case "added-soon": play("hop"); flash("worried", 1500); say("Added, and that one's close. I've put it near the top."); break;
       case "eaten": play("hop"); flash("party", 1200); snow(5); say("Nice, one less to worry about."); break;
       case "freezer": say("Good call. The freezer stops the clock for weeks."); break;
+      case "opened": play("hop"); say("Opened it? I've shortened the clock to match. Use it sooner now."); break;
       case "cleared": say("Cleared the past-date ones. Fresh start."); break;
     }
   }

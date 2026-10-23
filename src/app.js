@@ -180,7 +180,7 @@
       name.textContent = it.name || (FW.food(it.food) ? FW.food(it.food).name : "Food");
       var sub = document.createElement("div");
       sub.className = "i-sub";
-      sub.textContent = FW.places[it.place] + (it.opened ? " · open" : "") + (it.packDate ? " · " + (it.dateKind === "best" ? "best-before" : "use-by") + " on pack" : "");
+      sub.textContent = FW.places[it.place] + (it.opened || it.openedAt ? " · open" : "") + (it.packDate ? " · " + (it.dateKind === "best" ? "best-before" : "use-by") + " on pack" : "");
       main.appendChild(name); main.appendChild(sub);
 
       var tip = FW.advice(it);
@@ -200,9 +200,36 @@
         main.appendChild(fnote);
       }
 
+      if (FW.opensShorten(it)) {
+        var onote = document.createElement("div");
+        onote.className = "i-freeze";
+        onote.textContent = "Opened, so it's counted from its open shelf life, not the pack date.";
+        main.appendChild(onote);
+      }
+
       var left = document.createElement("div");
       left.className = "i-left";
       left.textContent = FW.phrase(it);
+
+      // "Opened it" shortens the clock to the open shelf life from today, but
+      // only for a sealed thing that actually keeps less once open.
+      var sealedK = FW.food(it.food) ? FW.keepDays(it.food, it.place, false) : null;
+      var openK = FW.food(it.food) ? FW.keepDays(it.food, it.place, true) : null;
+      var canOpen = !it.opened && it.openedAt == null && openK != null && sealedK != null && openK < sealedK;
+      var openBtn = null;
+      if (canOpen) {
+        openBtn = document.createElement("button");
+        openBtn.className = "i-open"; openBtn.type = "button"; openBtn.textContent = "Opened it";
+        openBtn.setAttribute("aria-label", "Mark " + name.textContent + " as opened today");
+        openBtn.addEventListener("click", function () {
+          // Only record when it was opened; the engine then counts from the
+          // open shelf life. Leaving `opened` as-is keeps the note meaningful.
+          it.openedAt = FW.startOfDay(Date.now());
+          save();
+          render();
+          if (window.Frost) Frost.react("opened");
+        });
+      }
 
       var eat = document.createElement("button");
       eat.className = "i-eat"; eat.type = "button"; eat.textContent = "Ate it";
@@ -214,7 +241,9 @@
       del.setAttribute("aria-label", "Remove " + name.textContent);
       del.addEventListener("click", function () { remove(it.id, null); });
 
-      li.appendChild(main); li.appendChild(left); li.appendChild(eat); li.appendChild(del);
+      li.appendChild(main); li.appendChild(left);
+      if (openBtn) li.appendChild(openBtn);
+      li.appendChild(eat); li.appendChild(del);
       list.appendChild(li);
     });
 
