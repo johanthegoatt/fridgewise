@@ -26,6 +26,12 @@ too late. Fridgewise is a one-screen list that keeps the order for you.
   open shelf life counted from that day, which is often sooner than the pack
   date. Milk, for instance, keeps about a week sealed but only a few days once
   open.
+- Tap **Thawed it** when you move something out of the freezer to defrost in
+  the fridge, and the clock restarts on its fridge life from that day: a chicken
+  that was good for months frozen now needs using in a day or two. This follows
+  the USDA "Big Thaw" rule, that food thawed in the fridge keeps a day or two
+  for mince, poultry and fish and a few days for other cuts, whatever the frozen
+  date said.
 - Tap **Ate it** when it's gone, or put something in the freezer to buy weeks
   more time.
 
@@ -40,7 +46,9 @@ The days each food keeps come from the US FoodSafety.gov
 [Cold Food Storage Chart](https://www.foodsafety.gov/food-safety-charts/cold-food-storage-charts)
 and the USDA FoodKeeper, using the shorter end of each range so the date leans
 safe. They are a guide, not a promise: a pack's own use-by date wins, and if
-something looks or smells off, bin it.
+something looks or smells off, bin it. The thawed-food window follows the USDA /
+FoodSafety.gov [The Big Thaw](https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/big-thaw-safe-defrosting-methods)
+guidance, which matches each food's fridge shelf life in the table above.
 
 If a pack has a date printed on it, type it in and say whether it's a **use-by**
 or a **best-before**. The pack date then overrides the stored-time guess, and

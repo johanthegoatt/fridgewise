@@ -207,6 +207,14 @@
         main.appendChild(onote);
       }
 
+      if (FW.thawShorten(it)) {
+        var tnote = document.createElement("div");
+        tnote.className = "i-freeze";
+        var td = FW.thawedKeepDays(it.food);
+        tnote.textContent = "Thawed, so use it within " + td + (td === 1 ? " day" : " days") + " from the fridge, not the frozen date.";
+        main.appendChild(tnote);
+      }
+
       var left = document.createElement("div");
       left.className = "i-left";
       left.textContent = FW.phrase(it);
@@ -231,6 +239,22 @@
         });
       }
 
+      // "Thawed it" moves a frozen thing onto its fridge clock from today.
+      var canThaw = it.place === "freezer" && it.thawedAt == null &&
+        FW.food(it.food) && FW.thawedKeepDays(it.food) != null;
+      var thawBtn = null;
+      if (canThaw) {
+        thawBtn = document.createElement("button");
+        thawBtn.className = "i-open"; thawBtn.type = "button"; thawBtn.textContent = "Thawed it";
+        thawBtn.setAttribute("aria-label", "Mark " + name.textContent + " as thawed today");
+        thawBtn.addEventListener("click", function () {
+          it.thawedAt = FW.startOfDay(Date.now());
+          save();
+          render();
+          if (window.Frost) Frost.react("opened");
+        });
+      }
+
       var eat = document.createElement("button");
       eat.className = "i-eat"; eat.type = "button"; eat.textContent = "Ate it";
       eat.setAttribute("aria-label", "Mark " + name.textContent + " as eaten");
@@ -243,6 +267,7 @@
 
       li.appendChild(main); li.appendChild(left);
       if (openBtn) li.appendChild(openBtn);
+      if (thawBtn) li.appendChild(thawBtn);
       li.appendChild(eat); li.appendChild(del);
       list.appendChild(li);
     });
