@@ -108,7 +108,38 @@
         by = by == null ? oc : Math.min(by, oc);
       }
     }
+    // Thawing a frozen item restarts the clock on its fridge life: once it's
+    // defrosted it keeps only as long as it would fresh in the fridge, counted
+    // from the day you thawed it, whatever date the freezer bag said (USDA /
+    // FoodSafety.gov "The Big Thaw": food thawed in the fridge keeps a day or
+    // two for mince, poultry and fish, a few days for other cuts). The sooner
+    // of the two dates wins, so a long-frozen chicken drops to its fridge life.
+    if (item.thawedAt != null) {
+      var tkd = thawedKeepDays(item.food);
+      if (tkd != null) {
+        var tc = startOfDay(item.thawedAt) + tkd * DAY;
+        by = by == null ? tc : Math.min(by, tc);
+      }
+    }
     return by;
+  }
+
+  // How long a food keeps in the fridge once thawed: its fridge open shelf
+  // life. Only meaningful for a food that can be frozen in the first place.
+  function thawedKeepDays(foodId) {
+    if (!canFreeze(foodId)) return null;
+    return keepDays(foodId, "fridge", true);
+  }
+
+  // True when thawing is what pulls the use-by in (so the page can say
+  // "thawed, use within N days" rather than trust the freezer date).
+  function thawShorten(item) {
+    if (!item || item.thawedAt == null) return false;
+    var tkd = thawedKeepDays(item.food);
+    if (tkd == null) return false;
+    var base = baseUseBy(item);
+    var tc = startOfDay(item.thawedAt) + tkd * DAY;
+    return base == null || tc < base;
   }
 
   function baseUseBy(item) {
@@ -262,6 +293,8 @@
     freezeHint: freezeHint,
     useBy: useBy,
     opensShorten: opensShorten,
+    thawedKeepDays: thawedKeepDays,
+    thawShorten: thawShorten,
     advice: advice,
     daysLeft: daysLeft,
     bucket: bucket,
