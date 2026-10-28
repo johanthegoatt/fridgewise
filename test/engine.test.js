@@ -201,3 +201,28 @@ test("an item never opened is unchanged", function () {
   assert.strictEqual(FW.useBy(item), added + 42 * FW.DAY); // sealed hard cheese
   assert.strictEqual(FW.opensShorten(item), false);
 });
+
+test("thawing a frozen item restarts the clock on its fridge life", function () {
+  var DAY = FW.DAY;
+  var added = FW.startOfDay(Date.now() - 30 * DAY); // frozen a month ago
+  // Raw chicken: freezer open life 270 days, fridge open life 1 day.
+  var item = { food: "raw-chicken", place: "freezer", addedAt: added, thawedAt: FW.startOfDay(Date.now()) };
+  assert.strictEqual(FW.useBy(item), FW.startOfDay(Date.now()) + 1 * DAY);
+  assert.strictEqual(FW.thawShorten(item), true);
+});
+
+test("thawed red-meat cuts keep longer than thawed poultry", function () {
+  assert.strictEqual(FW.thawedKeepDays("raw-chicken"), 1); // poultry: a day
+  assert.strictEqual(FW.thawedKeepDays("raw-steak"), 3);   // steak/chops: a few days
+});
+
+test("thawing is only for foods that can be frozen", function () {
+  assert.strictEqual(FW.thawedKeepDays("greens"), null); // salad can't be frozen
+});
+
+test("an item that was never thawed is unchanged", function () {
+  var added = FW.startOfDay(Date.now());
+  var item = { food: "raw-steak", place: "freezer", addedAt: added };
+  assert.strictEqual(FW.useBy(item), added + 120 * FW.DAY); // full freezer life
+  assert.strictEqual(FW.thawShorten(item), false);
+});
