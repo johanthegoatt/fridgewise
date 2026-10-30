@@ -226,3 +226,43 @@ test("an item that was never thawed is unchanged", function () {
   assert.strictEqual(FW.useBy(item), added + 120 * FW.DAY); // full freezer life
   assert.strictEqual(FW.thawShorten(item), false);
 });
+
+// ---- a food knows whether its date is about safety or quality ----
+
+test("dateKind: raw and soft foods are safety dates, hard/dry/produce are quality", function () {
+  assert.strictEqual(FW.dateKind("raw-chicken"), "use");
+  assert.strictEqual(FW.dateKind("milk"), "use");
+  assert.strictEqual(FW.dateKind("soup"), "use");
+  assert.strictEqual(FW.dateKind("hard-cheese"), "best");
+  assert.strictEqual(FW.dateKind("eggs"), "best");
+  assert.strictEqual(FW.dateKind("apples"), "best");
+});
+
+test("kindNote labels a tracked item near its own estimated date, no pack date needed", function () {
+  // Milk (safety) added 10 days ago is past its ~5-7 day fridge life.
+  var milk = { food: "milk", place: "fridge", opened: false, addedAt: at("2026-06-05") };
+  assert.ok(FW.daysLeft(milk, NOW) < 0);
+  assert.match(FW.kindNote(milk, NOW), /Safety date/);
+  assert.match(FW.kindNote(milk, NOW), /don't eat/i);
+
+  // Apples (quality) in the fridge keep 28 days; added 40 days ago they're past.
+  var apple = { food: "apples", place: "fridge", opened: true, addedAt: at("2026-05-06") };
+  assert.ok(FW.daysLeft(apple, NOW) < 0);
+  assert.match(FW.kindNote(apple, NOW), /Quality date/);
+  assert.match(FW.kindNote(apple, NOW), /usually still fine/);
+});
+
+test("kindNote is empty while an item is comfortably in date", function () {
+  var milk = { food: "milk", place: "fridge", opened: false, addedAt: at("2026-06-14") };
+  assert.strictEqual(FW.kindNote(milk, NOW), "");
+});
+
+test("advice falls back to the food's natural date kind when the user didn't say", function () {
+  // Hard cheese is a quality date; with a pack date in the past and no explicit
+  // dateKind, advice should read as best-before, not use-by.
+  var cheese = { food: "hard-cheese", place: "fridge", addedAt: at("2026-06-01"), packDate: at("2026-06-13") };
+  assert.match(FW.advice(cheese, NOW), /usually still fine/);
+  // Raw chicken is a safety date, so the same situation reads as use-by.
+  var chicken = { food: "raw-chicken", place: "fridge", addedAt: at("2026-06-01"), packDate: at("2026-06-13") };
+  assert.match(FW.advice(chicken, NOW), /Don't eat it/);
+});
