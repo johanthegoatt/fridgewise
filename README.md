@@ -57,6 +57,13 @@ it's passed the line is "don't eat it"; a best-before is about quality, so it's
 usually fine after, just not at its best. That split follows the UK Food
 Standards Agency's guidance on the two kinds of date.
 
+You don't have to type a pack date to get that steer, though: each food knows
+which kind of date it naturally carries. Raw meat, fish, cooked leftovers and
+the softer dairy are safety (use-by) foods; hard cheese, eggs, bread and most
+produce are quality (best-before) foods. So a tracked item nearing its own
+estimated date still gets the right line, "eat it or freeze it now" for a
+safety food, "best soon, but usually fine a little after" for a quality one.
+
 ## Run it
 
 It's plain HTML, CSS and JavaScript with no build step. Open `index.html`, or

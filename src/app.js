@@ -189,6 +189,16 @@
         note.className = "i-advice" + (it.dateKind === "best" ? " mild" : "");
         note.textContent = tip;
         main.appendChild(note);
+      } else {
+        // No typed pack date: still say whether its date is a safety or a
+        // quality one, from the food itself, when it's near or past its date.
+        var kn = FW.kindNote(it);
+        if (kn) {
+          var knote = document.createElement("div");
+          knote.className = "i-advice" + (FW.dateKind(it.food) === "best" ? " mild" : "");
+          knote.textContent = kn;
+          main.appendChild(knote);
+        }
       }
 
       // Use it or freeze it: a nudge for freezable things close to their date.
