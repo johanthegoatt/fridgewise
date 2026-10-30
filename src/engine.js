@@ -18,23 +18,23 @@
   // "don't keep it there". Numbers are the short end of the published range.
   // group is just for the little icon and the pick list order.
   var FOODS = [
-    { id: "leftovers", name: "Cooked leftovers", group: "cooked", fridge: { open: 3 }, freezer: { open: 90 } },
-    { id: "cooked-meat", name: "Cooked meat or chicken", group: "cooked", fridge: { open: 3 }, freezer: { open: 90 } },
-    { id: "cooked-rice", name: "Cooked rice or pasta", group: "cooked", fridge: { open: 3 }, freezer: { open: 60 } },
-    { id: "soup", name: "Soup or stew", group: "cooked", fridge: { open: 3 }, freezer: { open: 90 } },
+    { id: "leftovers", name: "Cooked leftovers", group: "cooked", safety: true, fridge: { open: 3 }, freezer: { open: 90 } },
+    { id: "cooked-meat", name: "Cooked meat or chicken", group: "cooked", safety: true, fridge: { open: 3 }, freezer: { open: 90 } },
+    { id: "cooked-rice", name: "Cooked rice or pasta", group: "cooked", safety: true, fridge: { open: 3 }, freezer: { open: 60 } },
+    { id: "soup", name: "Soup or stew", group: "cooked", safety: true, fridge: { open: 3 }, freezer: { open: 90 } },
 
-    { id: "raw-chicken", name: "Raw chicken or turkey", group: "raw", fridge: { sealed: 1, open: 1 }, freezer: { sealed: 270, open: 270 } },
-    { id: "raw-mince", name: "Raw mince", group: "raw", fridge: { sealed: 1, open: 1 }, freezer: { sealed: 90, open: 90 } },
-    { id: "raw-steak", name: "Raw steak or chops", group: "raw", fridge: { sealed: 3, open: 3 }, freezer: { sealed: 120, open: 120 } },
-    { id: "raw-fish", name: "Raw fish", group: "raw", fridge: { sealed: 1, open: 1 }, freezer: { sealed: 90, open: 90 } },
-    { id: "bacon", name: "Bacon", group: "raw", fridge: { sealed: 14, open: 7 }, freezer: { sealed: 30, open: 30 } },
-    { id: "sausages", name: "Raw sausages", group: "raw", fridge: { sealed: 2, open: 2 }, freezer: { sealed: 60, open: 60 } },
-    { id: "deli-meat", name: "Sliced deli meat", group: "raw", fridge: { sealed: 5, open: 3 }, freezer: { sealed: 60, open: 60 } },
+    { id: "raw-chicken", name: "Raw chicken or turkey", group: "raw", safety: true, fridge: { sealed: 1, open: 1 }, freezer: { sealed: 270, open: 270 } },
+    { id: "raw-mince", name: "Raw mince", group: "raw", safety: true, fridge: { sealed: 1, open: 1 }, freezer: { sealed: 90, open: 90 } },
+    { id: "raw-steak", name: "Raw steak or chops", group: "raw", safety: true, fridge: { sealed: 3, open: 3 }, freezer: { sealed: 120, open: 120 } },
+    { id: "raw-fish", name: "Raw fish", group: "raw", safety: true, fridge: { sealed: 1, open: 1 }, freezer: { sealed: 90, open: 90 } },
+    { id: "bacon", name: "Bacon", group: "raw", safety: true, fridge: { sealed: 14, open: 7 }, freezer: { sealed: 30, open: 30 } },
+    { id: "sausages", name: "Raw sausages", group: "raw", safety: true, fridge: { sealed: 2, open: 2 }, freezer: { sealed: 60, open: 60 } },
+    { id: "deli-meat", name: "Sliced deli meat", group: "raw", safety: true, fridge: { sealed: 5, open: 3 }, freezer: { sealed: 60, open: 60 } },
 
-    { id: "milk", name: "Milk", group: "dairy", fridge: { sealed: 7, open: 5 }, freezer: { sealed: 90, open: 90 } },
-    { id: "yogurt", name: "Yogurt", group: "dairy", fridge: { sealed: 14, open: 7 } },
+    { id: "milk", name: "Milk", group: "dairy", safety: true, fridge: { sealed: 7, open: 5 }, freezer: { sealed: 90, open: 90 } },
+    { id: "yogurt", name: "Yogurt", group: "dairy", safety: true, fridge: { sealed: 14, open: 7 } },
     { id: "hard-cheese", name: "Hard cheese", group: "dairy", fridge: { sealed: 42, open: 28 } },
-    { id: "soft-cheese", name: "Soft cheese", group: "dairy", fridge: { sealed: 14, open: 7 } },
+    { id: "soft-cheese", name: "Soft cheese", group: "dairy", safety: true, fridge: { sealed: 14, open: 7 } },
     { id: "butter", name: "Butter", group: "dairy", fridge: { sealed: 60, open: 30 }, freezer: { sealed: 270, open: 270 } },
     { id: "eggs", name: "Eggs (in shell)", group: "dairy", fridge: { sealed: 21, open: 21 } },
 
@@ -49,7 +49,7 @@
     { id: "bread", name: "Bread", group: "pantry", pantry: { sealed: 5, open: 3 }, freezer: { sealed: 90, open: 90 } },
     { id: "opened-jar", name: "Opened jar or sauce", group: "pantry", fridge: { open: 14 } },
     { id: "juice", name: "Opened juice", group: "pantry", fridge: { open: 8 } },
-    { id: "hummus", name: "Hummus or dip", group: "pantry", fridge: { sealed: 7, open: 4 } }
+    { id: "hummus", name: "Hummus or dip", group: "pantry", safety: true, fridge: { sealed: 7, open: 4 } }
   ];
 
   var PLACES = { fridge: "Fridge", freezer: "Freezer", pantry: "Cupboard" };
@@ -172,7 +172,10 @@
     if (item.packDate == null) return "";
     var d = daysLeft(item, now);
     if (d == null) return "";
-    var best = item.dateKind === "best";
+    // Use what the user said if they said it, otherwise fall back to what kind
+    // of date this food naturally carries (raw meat and dairy are safety dates;
+    // hard cheese, eggs and most produce are quality dates).
+    var best = item.dateKind != null ? item.dateKind === "best" : dateKind(item.food) === "best";
     if (d < 0) {
       return best
         ? "Past the best-before. Have a look and a smell; it's usually still fine."
@@ -183,6 +186,38 @@
       return best
         ? "Best before " + when + ". Fine after, just not at its best."
         : "Use by " + when + ". Eat it by then or freeze it.";
+    }
+    return "";
+  }
+
+  // What kind of date a food carries by its nature. A "use" date is about
+  // safety: raw meat, fish, cooked leftovers and the softer dairy go off in a
+  // way that can make you ill, so you don't eat them after. A "best" date is
+  // about quality: hard cheese, eggs, bread and most produce are usually still
+  // fine after, just past their best (UK FSA: use-by is safety, best-before is
+  // quality). Foods carry safety:true in the table; everything else is quality.
+  function dateKind(foodId) {
+    var f = byId[foodId];
+    return f && f.safety ? "use" : "best";
+  }
+
+  // A short safety/quality note for a tracked item near its date, grounded in
+  // the food (so it works for Fridgewise's own estimate, not only a typed pack
+  // date). Empty when the item is still comfortably in date.
+  function kindNote(item, now) {
+    if (!item) return "";
+    var d = daysLeft(item, now);
+    if (d == null) return "";
+    var safety = dateKind(item.food) === "use";
+    if (d < 0) {
+      return safety
+        ? "Safety date — don't eat it."
+        : "Quality date — have a look and a smell; it's usually still fine.";
+    }
+    if (d <= 1) {
+      return safety
+        ? "Safety date — eat it or freeze it now."
+        : "Quality date — best soon, but usually fine a little after.";
     }
     return "";
   }
@@ -296,6 +331,8 @@
     thawedKeepDays: thawedKeepDays,
     thawShorten: thawShorten,
     advice: advice,
+    dateKind: dateKind,
+    kindNote: kindNote,
     daysLeft: daysLeft,
     bucket: bucket,
     rank: rank,
